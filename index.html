@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speed Data Chart</title>
+  <!-- Include D3.js library -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    h1 {
+      color: black;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>My Network Inspector</h1>
+  <svg width="1000" height="500"></svg>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Fetch speed test data from the server
+        const response = await fetch('/speedtest');
+        if (!response.ok) {
+          throw new Error('Failed to fetch speed test data');
+        }
+        const data = await response.json();
+
+        // Select only the last 24 entries
+        const filteredData = data.slice(-24);
+
+        console.log('Fetched data:', filteredData);
+
+        // Extract speed data from the response
+        const speeds = filteredData.map(entry => entry.speedMbps);
+        const indices = filteredData.map((entry, index) => index + 1); // Index for each entry
+
+        // Set the dimensions and margins of the graph
+        const margin = { top: 30, right: 30, bottom: 70, left: 60 };
+        const width = 1000 - margin.left - margin.right;
+        const height = 500 - margin.top - margin.bottom;
+
+        // Append the SVG object to the body of the page
+        const svg = d3.select("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // X axis
+        const x = d3.scaleBand()
+          .range([0, width])
+          .domain(indices.map(String))
+          .padding(0.2);
+        svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
+
+        // Add Y axis
+        const y = d3.scaleLinear()
+          .domain([0, d3.max(speeds)])
+          .range([height, 0]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
+
+        // Bars
+        svg.selectAll("mybar")
+          .data(filteredData)
+          .enter()
+          .append("rect")
+          .attr("x", (d, i) => x(String(i + 1)))
+          .attr("y", d => y(d.speedMbps))
+          .attr("width", x.bandwidth())
+          .attr("height", d => height - y(d.speedMbps))
+          .attr("fill", "steelblue");
+
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
