@@ -2,7 +2,7 @@
 
 ## **Overview:**
 
-Network Inspector is a web application designed to monitor and visualize network speed data over time. It provides insights into the network performance by displaying historical network speed measurements in the form of interactive charts.
+Network Inspector is a web application designed to monitor and visualize network speed data over time. It provides insights into the network performance by displaying historical network speed measurements in the form of bar charts.
 
 ## **Features:**
 
